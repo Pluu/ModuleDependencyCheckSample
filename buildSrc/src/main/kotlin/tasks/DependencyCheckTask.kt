@@ -19,41 +19,68 @@ abstract class DependencyCheckTask : DefaultTask() {
 
         println("[All graph]")
         inverseGraph.forEach { (key, value) ->
-            println(key.name)
-            println("> ${value.joinToString(", ")}")
+            println(key.path)
+            println(">>> implementation: ${value.implementation.displayName()}")
+            println(">>> api: ${value.api.displayName()}")
+            println()
         }
 
         // Find module
         if (moduleNames.isNotEmpty()) {
             val findModule = moduleNames.first()
 
-            println()
+            val findProject = inverseGraph.keys.firstOrNull {
+                findModule == it.path
+            }
+            if (findProject == null) {
+                println("$findModule module is not exist")
+                return
+            }
+
             println("===============")
             println("Check modules from '[$findModule]' module")
-            val checkModule = mutableSetOf<Project>()
 
-            inverseGraph.entries.firstOrNull { entry ->
-                findModule == entry.key.name
-            }?.let { entry ->
-                checkModule.add(entry.key)
-                checkModule.addAll(entry.value)
+            val result = findAffectedModule(findProject, inverseGraph)
+            if (result.isNotEmpty()) {
+                result.sortedBy { it.path }.forEach {
+                    println(">>> ${it.path}")
+                }
+            } else {
+                println(">>> $findModule is not found")
             }
 
-            checkModule.sortedBy { it.name }.forEach {
-                println("> $it")
-            }
             println("===============")
-            println()
         }
-
     }
 
-    private fun inverseGenerateGraph(rootProject: Project): Map<Project, List<Project>> {
+    private fun findAffectedModule(
+        startPoint: Project,
+        inverseGraph: Map<Project, Dependency>
+    ): Set<Project> {
+        val checkModule = mutableSetOf<Project>()
+        val queue = ArrayDeque<Project>()
+        queue.add(startPoint)
+
+        while (queue.isNotEmpty()) {
+            val project = queue.removeFirst()
+            inverseGraph.entries.firstOrNull { entry ->
+                project == entry.key
+            }?.let { entry ->
+                checkModule.add(entry.key)
+                checkModule.addAll(entry.value.implementation)
+                queue.addAll(entry.value.api)
+            }
+        }
+
+        return checkModule
+    }
+
+    private fun inverseGenerateGraph(rootProject: Project): Map<Project, Dependency> {
         val queue = ArrayDeque<Project>()
         queue.add(rootProject)
 
         val projects = mutableSetOf<Project>()
-        val dependencies = mutableMapOf<Project, MutableList<Project>>()
+        val dependencies = mutableMapOf<Project, Dependency>()
 
         while (queue.isNotEmpty()) {
             val project = queue.removeFirst()
@@ -65,12 +92,12 @@ abstract class DependencyCheckTask : DefaultTask() {
                     .map { it.dependencyProject }
                     .forEach { dependency ->
                         projects.add(dependency)
-                        dependencies.putIfAbsent(dependency, mutableListOf())
+                        dependencies.putIfAbsent(dependency, Dependency())
                         val configName = config.name.lowercase()
                         if (configName.endsWith("implementation")) {
-                            dependencies[dependency]?.add(project)
+                            dependencies[dependency]?.implementation?.add(project)
                         } else if (configName.endsWith("api")) {
-                            dependencies[dependency]?.add(project)
+                            dependencies[dependency]?.api?.add(project)
                         }
                     }
             }
@@ -78,6 +105,18 @@ abstract class DependencyCheckTask : DefaultTask() {
         return dependencies.filterValues { it.isNotEmpty() }
     }
 }
+
+internal data class Dependency(
+    val implementation: MutableList<Project> = mutableListOf(),
+    val api: MutableList<Project> = mutableListOf(),
+) {
+    fun dependencies(): List<Project> = implementation + api
+
+    fun isNotEmpty(): Boolean = implementation.isNotEmpty() || api.isNotEmpty()
+}
+
+internal fun List<Project>.displayName(): String =
+    joinToString(", ") { it.path }.ifEmpty { "Empty" }
 
 internal fun Project.registerTask() {
     project.afterEvaluate {
@@ -88,7 +127,7 @@ internal fun Project.registerTask() {
         }
 
         project.tasks.register<DependencyCheckTask>("checkPluuFixed") {
-            moduleNames = listOf("common")
+            moduleNames = listOf(":common")
         }
     }
 }
