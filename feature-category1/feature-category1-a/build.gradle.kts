@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.pluu.finder.feature_category1_b"
+    namespace = "com.pluu.finder.feature_category1_a"
     compileSdk = 34
 
     defaultConfig {
@@ -37,7 +37,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-    implementation(project(":feature-category1-common"))
+    implementation(project(":feature-category1:feature-category1-common"))
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
