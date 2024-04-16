@@ -10,7 +10,6 @@ java {
 
 dependencies {
     implementation(project(":common"))
-    implementation(project(":core-data"))
     api(project(":feature-common"))
     implementation(project(":group-data:group1-data"))
 }

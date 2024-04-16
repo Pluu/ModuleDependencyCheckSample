@@ -1,3 +1,5 @@
+## Module Graph
+
 ```mermaid
 graph BT;
 common--impl-->app;
@@ -15,7 +17,6 @@ core-data--impl-->app;
 core-data--impl-->feature-common;
 core-data--impl-->feature:pluu;
 core-data--api-->group-data:group1-data;
-core-data--impl-->group-common:group1;
 core-data--api-->group-data:group2-data;
 core-data--impl-->feature:group2-single;
 
@@ -39,6 +40,21 @@ feature:group1:feature-a--impl-->app;
 feature:group1:feature-b--impl-->app;     
       
 linkStyle 13 stroke-width:4px,stroke:red
-linkStyle 15 stroke-width:4px,stroke:red
-linkStyle 18 stroke-width:4px,stroke:red
+linkStyle 14 stroke-width:4px,stroke:red
+linkStyle 17 stroke-width:4px,stroke:red
 ```
+
+## Result
+
+|        change :common        |      change :core-data       |
+| :--------------------------: | :--------------------------: |
+| <img src="arts/Case1.png" /> | <img src="arts/Case2.png" /> |
+
+|    change :feature-common    |     change :feature:pluu     |
+| :--------------------------: | :--------------------------: |
+| <img src="arts/Case3.png" /> | <img src="arts/Case4.png" /> |
+
+| change :group-data:group1-data and :feature:group1:feature-b |
+| :----------------------------------------------------------: |
+|            <img src="arts/Case5-multiple.png" />             |
+
