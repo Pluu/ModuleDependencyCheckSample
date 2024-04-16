@@ -27,26 +27,27 @@ abstract class DependencyCheckTask : DefaultTask() {
 
         // Find module
         if (moduleNames.isNotEmpty()) {
-            val findModule = moduleNames.first()
+            val projectNames = inverseGraph.keys.associateBy { it.path }
+            val requestModules = mutableListOf<Project>()
 
-            val findProject = inverseGraph.keys.firstOrNull {
-                findModule == it.path
+            moduleNames.forEach { name ->
+                if (projectNames.containsKey(name)) {
+                    requestModules.add(projectNames[name]!!)
+                } else {
+                    println("$name module is not exist")
+                }
             }
-            if (findProject == null) {
-                println("$findModule module is not exist")
-                return
-            }
-
             println("===============")
-            println("Check modules from '[$findModule]' module")
+            println("Check modules from ${requestModules.joinToString { "'[${it.path}]'" }} module")
 
-            val result = findAffectedModule(findProject, inverseGraph)
+            val result = findAffectedModule(requestModules, inverseGraph)
             if (result.isNotEmpty()) {
+                println("> Found ${result.size} modules.")
                 result.sortedBy { it.path }.forEach {
                     println(">>> ${it.path}")
                 }
             } else {
-                println(">>> $findModule is not found")
+                println(">>> affected module is not found")
             }
 
             println("===============")
@@ -54,25 +55,31 @@ abstract class DependencyCheckTask : DefaultTask() {
     }
 
     private fun findAffectedModule(
-        startPoint: Project,
+        startPoint: List<Project>,
         inverseGraph: Map<Project, Dependency>
     ): Set<Project> {
-        val checkModule = mutableSetOf<Project>()
+        val checkedModule = mutableSetOf<Project>()
+        val affectedModules = mutableSetOf<Project>()
         val queue = ArrayDeque<Project>()
-        queue.add(startPoint)
+        queue.addAll(startPoint)
 
         while (queue.isNotEmpty()) {
             val project = queue.removeFirst()
+            if (checkedModule.contains(project)) {
+                continue
+            }
+            checkedModule.add(project)
+
             inverseGraph.entries.firstOrNull { entry ->
                 project == entry.key
             }?.let { entry ->
-                checkModule.add(entry.key)
-                checkModule.addAll(entry.value.implementation)
+                affectedModules.add(entry.key)
+                affectedModules.addAll(entry.value.implementation)
                 queue.addAll(entry.value.api)
             }
         }
 
-        return checkModule
+        return affectedModules
     }
 
     private fun inverseGenerateGraph(rootProject: Project): Map<Project, Dependency> {
