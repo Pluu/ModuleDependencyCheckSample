@@ -2,6 +2,23 @@
 
 ```mermaid
 graph BT;
+subgraph core_data
+core-data
+end
+subgraph feature_data
+group-data:group1-data
+group-data:group2-data
+end
+subgraph feature_common
+feature-common
+end
+subgraph feature
+feature:pluu
+feature:group1:feature-a
+feature:group1:feature-b
+feature:group2-single
+end
+
 common--impl-->app;
 common--impl-->core-data;
 common--impl-->feature-common;
@@ -37,7 +54,18 @@ feature:pluu--impl-->app;
 group-data:group2-data--impl-->feature:group2-single;           
 feature:group2-single--impl-->app;
 feature:group1:feature-a--impl-->app;
-feature:group1:feature-b--impl-->app;     
+feature:group1:feature-b--impl-->app;   
+
+fake-lint-.->app;
+fake-lint-.->core-data;
+fake-lint-.->feature-common;
+fake-lint-.->feature:pluu;
+fake-lint-.->group-data:group1-data;
+fake-lint-.->group-common:group1;
+fake-lint-.->feature:group1:feature-a;
+fake-lint-.->feature:group1:feature-b;
+fake-lint-.->group-data:group2-data;
+fake-lint-.->feature:group2-single;
       
 linkStyle 13 stroke-width:4px,stroke:red
 linkStyle 14 stroke-width:4px,stroke:red

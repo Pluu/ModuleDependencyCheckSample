@@ -8,6 +8,8 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 dependencies {
+    implementation(project(":fake-lint"))
+
     implementation(project(":common"))
     implementation(project(":feature-common"))
     implementation(project(":group-data:group1-data"))

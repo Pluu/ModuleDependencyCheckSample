@@ -9,6 +9,8 @@ java {
 }
 
 dependencies {
+    implementation(project(":fake-lint"))
+
     implementation(project(":common"))
     api(project(":core-data"))
 }

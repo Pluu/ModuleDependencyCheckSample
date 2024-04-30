@@ -36,6 +36,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":fake-lint"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
