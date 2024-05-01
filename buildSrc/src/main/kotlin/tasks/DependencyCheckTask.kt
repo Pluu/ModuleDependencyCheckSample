@@ -65,7 +65,7 @@ abstract class DependencyCheckTask : DefaultTask() {
 
         while (queue.isNotEmpty()) {
             val project = queue.removeFirst()
-            if (checkedModule.contains(project)) {
+            if (checkedModule.contains(project) || skipModules.contains(project.name)) {
                 continue
             }
             checkedModule.add(project)
@@ -111,6 +111,10 @@ abstract class DependencyCheckTask : DefaultTask() {
         }
         return dependencies.filterValues { it.isNotEmpty() }
     }
+
+    companion object {
+        private val skipModules = listOf(":fake-lint")
+    }
 }
 
 internal data class Dependency(
@@ -127,6 +131,7 @@ internal fun List<Project>.displayName(): String =
 
 internal fun Project.registerTask() {
     project.afterEvaluate {
+        // ex) gradle checkPluu -PmoduleNames=:common
         project.tasks.register<DependencyCheckTask>("checkPluu") {
             moduleNames = (properties["moduleNames"] as String)
                 .split(",")
