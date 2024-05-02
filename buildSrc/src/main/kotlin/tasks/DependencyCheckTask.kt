@@ -109,7 +109,7 @@ abstract class DependencyCheckTask : DefaultTask() {
                     }
             }
         }
-        return dependencies.filterValues { it.isNotEmpty() }
+        return dependencies
     }
 
     companion object {
