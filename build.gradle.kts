@@ -5,4 +5,9 @@ plugins {
     alias(libs.plugins.androidLibrary) apply false
     alias(libs.plugins.jetbrainsKotlinJvm) apply false
     id("pluu.dependencyChecker")
+    id("pluu.buildTime")
+}
+
+pluuTime {
+    enable = true
 }

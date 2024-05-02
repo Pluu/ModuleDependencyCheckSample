@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Presidents</title>
+    <meta charset="utf-8">
+    <script src="d3-gtimeline.full.umd.cjs"></script>
+    <style type="text/css">
+        div.tooltip {
+          position: absolute;
+          text-align: center;
+          padding: 5px;
+          font: 12px sans-serif;
+          background: white;
+          border: 1px solid #AAA;
+          border-radius: 2px;
+          pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+<h1>Build metrics</h1>
+<p>
+    Configuration time: %configuration_time%<br>
+    Build start time: %build_start_time%<br>
+    Build end time: %build_end_time%<br>
+    Build time : %build_time%<br>
+    Build time with Configuration : %build_time_with_configuration%
+</p>
+<div id="chart"></div>
+
+<script type="text/javascript">
+    const chart = d3.timeline(),
+        data = [
+            %build_data%
+        ];
+
+    d3.select('#chart').datum(data).call(chart);
+
+</script>
+
+</body>
+
+</html>
